@@ -8,43 +8,31 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
 
 public class ScrPlatform implements Screen, InputProcessor {
 
     Game game;
     SpriteBatch batch;
-    Texture txDino, txPlat;
-    SprDino sprDino;
-    SprPlatform sprPlatform, sprPlatform2;
-    int nScreenWid = Gdx.graphics.getWidth(), nDinoHei;
-    Sprite sprBack;
-    float fScreenWidth = Gdx.graphics.getWidth(), fScreenHei = Gdx.graphics.getHeight();
-    private float fVy;
-    private float fVx;
-    OrthographicCamera camera;
+    Texture txDeadDino, txDino, txPlat;
+    sprDino sprDino;
+    sprPlatform sprPlatform;
+    Vector2 vDinoPos, vDinoDir, vDinoGrav, vPlatPos, vPlatDir;
 
     public ScrPlatform(Game _game) {
         game = _game;
         batch = new SpriteBatch();
         txDino = new Texture("Dinosaur.png");
+        txDeadDino = new Texture("dead.png");
         txPlat = new Texture("Platform.png");
-        sprBack = new Sprite(new Texture(Gdx.files.internal("world.jpg")));
-        sprBack.setSize(fScreenWidth, fScreenHei);
-        float aspectratio = (float) Gdx.graphics.getHeight() / Gdx.graphics.getWidth();
+        vDinoDir = new Vector2(0, 0);
+        vDinoGrav = new Vector2(0, 0);
+        vDinoPos = new Vector2(0, 0);
+        vPlatPos = new Vector2(200,200);
         Gdx.input.setInputProcessor((this));
-        Gdx.graphics.setDisplayMode(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        camera = new OrthographicCamera(fScreenWidth * aspectratio, fScreenHei);
-        camera.position.set(fScreenWidth / 2, fScreenHei / 2, 0);
-        sprDino = new SprDino("Dinosaur.png", 0, 0);
-        sprPlatform = new SprPlatform("Platform.png", 0, 0);
-        sprPlatform2 = new SprPlatform("Platform.png", 0, 0);
-        nDinoHei = txDino.getHeight();
-        sprPlatform.setX(nScreenWid);
-        sprPlatform2.setX(nScreenWid);
-        sprPlatform.setY(nDinoHei);
-        sprPlatform2.setY(nDinoHei);
+        Gdx.graphics.setDisplayMode(600, 400, true);
+        sprDino = new sprDino(txDino,txDeadDino, vDinoPos, vDinoDir, vDinoGrav, vPlatPos);
+        sprPlatform = new sprPlatform("Platform.png", vPlatPos, vPlatDir);
     }
 
     @Override
@@ -55,23 +43,14 @@ public class ScrPlatform implements Screen, InputProcessor {
     @Override
     public void render(float f) {
         Gdx.gl.glClearColor(1, 0, 1, 1);
-        sprDino.update(fVx, fVy);
-        sprPlatform.update();
-        sprPlatform2.update();
-        camera.update();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        sprDino.update();
+        sprDino.isHitPlatform(sprPlatform);
         batch.begin();
-        batch.setProjectionMatrix(camera.combined);
-        sprBack.draw(batch);
         batch.draw(sprDino.getSprite(), sprDino.getX(), sprDino.getY());
         batch.draw(sprPlatform.getSprite(), sprPlatform.getX(), sprPlatform.getY());
-        batch.draw(sprPlatform2.getSprite(), sprPlatform.getX(), sprPlatform.getY());
-        if (sprDino.getX() >= 50) {
-            camera.translate(1f, 0f);
-        }
         batch.end();
     }
-
     @Override
     public void resize(int i, int i1) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -94,44 +73,35 @@ public class ScrPlatform implements Screen, InputProcessor {
 
     @Override
     public void dispose() {
-        sprBack.getTexture().dispose();
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.E) {
+        if (keycode == Input.Keys.SPACE && sprDino.bJump == false) {
+            vDinoDir.set((float) vDinoDir.x, 25);
+            vDinoGrav.set(0, (float) -0.5);
+            sprDino.bJump = true;
+        } else if (keycode == Input.Keys.A) {
+            vDinoDir.set(-10, (float) vDinoDir.y);
+
+        } else if (keycode == Input.Keys.D) {
+            vDinoDir.set(10, (float) vDinoDir.y);
+        } else if (keycode == Input.Keys.E) {
             System.exit(3);
-        } else if (keycode == Input.Keys.UP) {
-            fVy = 2;
-            System.out.println("UP");
-        } else if (keycode == Input.Keys.DOWN) {
-            fVy = -2;
-        } else if (keycode == Input.Keys.LEFT) {
-            fVx = -2;
-        } else if (keycode == Input.Keys.RIGHT) {
-            fVx = 2;
         }
         return false;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        if (keycode == Input.Keys.UP) {
-            fVy = 0;
-            System.out.println("UP");
-        } else if (keycode == Input.Keys.DOWN) {
-            fVy = 0;
-        } else if (keycode == Input.Keys.LEFT) {
-            fVx = 0;
-        } else if (keycode == Input.Keys.RIGHT) {
-            fVx = 0;
+        if (keycode == Input.Keys.A) {
+            vDinoDir.set(0, (float) vDinoDir.y);
+        } else if (keycode == Input.Keys.D) {
+            vDinoDir.set(0, (float) vDinoDir.y);
         }
         return false;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
     @Override
     public boolean keyTyped(char c) {
         return false;
