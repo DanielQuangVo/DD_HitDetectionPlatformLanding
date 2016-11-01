@@ -1,15 +1,14 @@
-package platformmovements.desktop;
+package HitDetection.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import platformmovements.GamPlatforms;
+import HitDetection.GamPlatforms;
 
 
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new GamPlatforms(), config);
-                                   
+		new LwjglApplication(new GamPlatforms(), config);                                 
 	}
 }

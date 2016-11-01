@@ -1,4 +1,4 @@
-package platformmovements;
+package HitDetection;
 
 import com.badlogic.gdx.Game;
 public class GamPlatforms  extends Game {
