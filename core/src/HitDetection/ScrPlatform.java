@@ -50,7 +50,6 @@ public class ScrPlatform implements Screen, InputProcessor {
   
 
     void isHitPlatform() {
-        System.out.println(sprPlatform.getSprite().getBoundingRectangle());
         if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
             sprDino.update(txDeadDino);
         } else {
