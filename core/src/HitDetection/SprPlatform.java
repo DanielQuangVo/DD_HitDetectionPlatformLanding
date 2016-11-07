@@ -14,13 +14,31 @@ public class SprPlatform extends Sprite {
     SprPlatform(Texture _txPlat) {
         txPlat = _txPlat;
         sprPlat = new Sprite(txPlat);
-        vPos = new Vector2(200,200);
-        vDir = new Vector2(0,0);
+        vPos = new Vector2(500,200);
+        vDir = new Vector2((float) -0.5,0);
     }
 
 
     void update() {
+        vPos.add(vDir);
         sprPlat.setPosition(vPos.x, vPos.y);
+    }
+    boolean isOffScreen(){
+        if(vPos.x < 0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    
+    boolean canSpawn(){
+        if(vPos.x < 200){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     public Sprite getSprite() {

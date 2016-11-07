@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import java.util.Iterator;
 
 public class ScrPlatform implements Screen, InputProcessor {
 
@@ -18,6 +20,7 @@ public class ScrPlatform implements Screen, InputProcessor {
     Texture txDeadDino, txDino, txPlat;
     SprDino sprDino;
     SprPlatform sprPlatform;
+    private Array<SprPlatform> arsprPlatform;
 
     public ScrPlatform(Game _game) {
         game = _game;
@@ -29,6 +32,8 @@ public class ScrPlatform implements Screen, InputProcessor {
         Gdx.graphics.setDisplayMode(600, 400, false);
         sprDino = new SprDino(txDino, txDeadDino);
         sprPlatform = new SprPlatform(txPlat);
+        arsprPlatform = new Array<SprPlatform>();
+        arsprPlatform.add(sprPlatform);
     }
 
     @Override
@@ -40,20 +45,42 @@ public class ScrPlatform implements Screen, InputProcessor {
     public void render(float f) {
         Gdx.gl.glClearColor(1, 0, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        sprPlatform.update();
+        for (SprPlatform sprPlatform : arsprPlatform) {
+            sprPlatform.update();
+        }
+
         isHitPlatform();
+        sprDino.update();
         batch.begin();
         batch.draw(sprDino.getSprite(), sprDino.getX(), sprDino.getY());
-        batch.draw(sprPlatform.getSprite(), sprPlatform.getX(), sprPlatform.getY());
+        for (SprPlatform sprPlatform : arsprPlatform) {
+            batch.draw(sprPlatform.getSprite(), sprPlatform.getX(), sprPlatform.getY());
+        }
         batch.end();
+        Iterator<SprPlatform> iter = arsprPlatform.iterator();
+        while (iter.hasNext()) {
+            SprPlatform sprPlatform = iter.next();
+            if (sprPlatform.canSpawn() && (arsprPlatform.size < 2)) {
+                sprPlatform = new SprPlatform(txPlat);
+                arsprPlatform.add(sprPlatform);
+            }
+            if (sprPlatform.isOffScreen()) {
+                iter.remove();
+            }
+        }
+
     }
-  
 
     void isHitPlatform() {
-        if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
-            sprDino.update(txDeadDino);
-        } else {
-            sprDino.update(txDino);
+        Iterator<SprPlatform> iter = arsprPlatform.iterator();
+        while (iter.hasNext()) {
+            SprPlatform sprPlatform = iter.next();
+            if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
+                System.out.println("Yes");
+                sprDino.Animate(txDeadDino);
+            } else {
+                sprDino.Animate(txDino);
+            }
         }
     }
 
@@ -79,6 +106,7 @@ public class ScrPlatform implements Screen, InputProcessor {
 
     @Override
     public void dispose() {
+        sprPlatform.getSprite().getTexture().dispose();
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

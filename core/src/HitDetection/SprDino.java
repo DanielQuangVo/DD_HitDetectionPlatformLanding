@@ -21,8 +21,7 @@ public class SprDino extends Sprite {
         vGrav = new Vector2(0, 0);
     }
 
-    void update(Texture _txDinoState) {
-        sprDino.setTexture(_txDinoState);
+    void update() {
         if (bJump) {
             vGrav.set(0, (float) (vGrav.y * 1.1));
         }
@@ -37,6 +36,9 @@ public class SprDino extends Sprite {
         sprDino.setPosition(vPos.x, vPos.y);
     }
 
+    void Animate(Texture _txDinoState) {
+        sprDino.setTexture(_txDinoState);
+    }
 
     public Sprite getSprite() {
         return sprDino;
