@@ -21,6 +21,7 @@ public class ScrPlatform implements Screen, InputProcessor {
     SprDino sprDino;
     SprPlatform sprPlatform;
     private Array<SprPlatform> arsprPlatform;
+    boolean isHitPlatform = false;
 
     public ScrPlatform(Game _game) {
         game = _game;
@@ -48,8 +49,11 @@ public class ScrPlatform implements Screen, InputProcessor {
         for (SprPlatform sprPlatform : arsprPlatform) {
             sprPlatform.update();
         }
-
-        isHitPlatform();
+        if (isHitPlatform()) {
+            sprDino.Animate(txDeadDino);
+        } else {
+            sprDino.Animate(txDino);
+        }
         sprDino.update();
         batch.begin();
         batch.draw(sprDino.getSprite(), sprDino.getX(), sprDino.getY());
@@ -68,20 +72,17 @@ public class ScrPlatform implements Screen, InputProcessor {
                 iter.remove();
             }
         }
-
     }
 
-    void isHitPlatform() {
+    boolean isHitPlatform() {
         Iterator<SprPlatform> iter = arsprPlatform.iterator();
         while (iter.hasNext()) {
             SprPlatform sprPlatform = iter.next();
             if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
-                System.out.println("Yes");
-                sprDino.Animate(txDeadDino);
-            } else {
-                sprDino.Animate(txDino);
+                return true;
             }
         }
+        return false;
     }
 
     @Override
