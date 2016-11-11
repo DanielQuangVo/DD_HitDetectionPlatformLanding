@@ -1,3 +1,4 @@
+//https://github.com/Mrgfhci/Drop
 package HitDetection;
 
 import com.badlogic.gdx.Game;
@@ -49,11 +50,13 @@ public class ScrPlatform implements Screen, InputProcessor {
         for (SprPlatform sprPlatform : arsprPlatform) {
             sprPlatform.update();
         }
-        if (isHitPlatform()) {
+        if (isHitPlatform()) {           
             sprDino.Animate(txDeadDino);
         } else {
+            sprDino.fGround = 0;
             sprDino.Animate(txDino);
         }
+        sprDino.Gravity();
         sprDino.update();
         batch.begin();
         batch.draw(sprDino.getSprite(), sprDino.getX(), sprDino.getY());
@@ -79,6 +82,11 @@ public class ScrPlatform implements Screen, InputProcessor {
         while (iter.hasNext()) {
             SprPlatform sprPlatform = iter.next();
             if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
+                if((sprDino.getY()-sprDino.vDir.y) > ((sprPlatform.getY()-sprPlatform.vDir.y)+sprPlatform.getHeight())){
+                    sprDino.fGround = (sprPlatform.getY()+sprPlatform.getSprite().getHeight());
+                    sprDino.vPos.y = sprDino.fGround;
+                    return false;
+                }
                 return true;
             }
         }
