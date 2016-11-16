@@ -8,9 +8,9 @@ import java.util.Vector;
 public class SprDino extends Sprite {
 
     Texture txDino, txDeadDino;
-    Vector2 vPos, vDir, vGrav;
+    Vector2 vPos, vDir, vGrav, vPrevPos;
     private Sprite sprDino;
-    boolean bJump;
+    boolean bJump, bGrav;
     float fGround;
 
     SprDino(Texture _txDino, Texture _txDeadDino) {
@@ -20,27 +20,37 @@ public class SprDino extends Sprite {
         vPos = new Vector2(0, 0);
         vDir = new Vector2(0, 0);
         vGrav = new Vector2(0, 0);
+        vPrevPos = new Vector2(0, 0);
         fGround = 0;
+        bGrav = false;
     }
-    
-    void Gravity(){
-        if (bJump) {
+
+    void gravity() {
+        vPrevPos.set(vPos);
+        if (vPos.y < 0) {
+            vPos.set(vPos.x, 0);
+            vDir.set(vDir.x, 0);
+            vGrav.set(0, 0);
+            bGrav = false;
+            bJump = false;
+        }
+        if (bGrav) {
             vGrav.set(0, (float) (vGrav.y * 1.1));
         }
-        if (vPos.y <= fGround) {
+        if (vPos.y == fGround) {
             vDir.set(vDir.x, 0);
-            vGrav.set(0, (float) -0.5);
-            vPos.set(vPos.x, fGround+1);
+            vGrav.set(0, 0);
+            vPos.set(vPos.x, fGround);
             bJump = false;
+            bGrav = false;
         }
     }
 
     void update() {
+        System.out.println(vGrav.y);
         vDir.add(vGrav);
         vPos.add(vDir);
         sprDino.setPosition(vPos.x, vPos.y);
-        System.out.println("graound"+fGround);
-        System.out.println(vPos.y);
     }
 
     void Animate(Texture _txDinoState) {

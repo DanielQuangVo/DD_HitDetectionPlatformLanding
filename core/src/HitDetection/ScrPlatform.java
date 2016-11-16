@@ -8,9 +8,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import java.util.Iterator;
 
@@ -22,7 +20,7 @@ public class ScrPlatform implements Screen, InputProcessor {
     SprDino sprDino;
     SprPlatform sprPlatform;
     private Array<SprPlatform> arsprPlatform;
-    boolean isHitPlatform = false;
+    int nHitPlatform = 0;
 
     public ScrPlatform(Game _game) {
         game = _game;
@@ -50,20 +48,20 @@ public class ScrPlatform implements Screen, InputProcessor {
         for (SprPlatform sprPlatform : arsprPlatform) {
             sprPlatform.update();
         }
-        if (isHitPlatform()) {           
-            sprDino.Animate(txDeadDino);
-        } else {
-            sprDino.fGround = 0;
-            sprDino.Animate(txDino);
-        }
-        sprDino.Gravity();
+        HitDetection();
+        sprDino.gravity();
         sprDino.update();
         batch.begin();
         batch.draw(sprDino.getSprite(), sprDino.getX(), sprDino.getY());
         for (SprPlatform sprPlatform : arsprPlatform) {
             batch.draw(sprPlatform.getSprite(), sprPlatform.getX(), sprPlatform.getY());
         }
+        SpawnPlatform();
         batch.end();
+
+    }
+
+    void SpawnPlatform() {
         Iterator<SprPlatform> iter = arsprPlatform.iterator();
         while (iter.hasNext()) {
             SprPlatform sprPlatform = iter.next();
@@ -77,20 +75,43 @@ public class ScrPlatform implements Screen, InputProcessor {
         }
     }
 
-    boolean isHitPlatform() {
+    void HitDetection() {
+        if (nHitPlatform() == 0) {
+            System.out.println("NO HIT");
+            sprDino.fGround = 0;
+            sprDino.bGrav = true;
+            if(sprDino.bJump == false){
+            sprDino.vGrav.set(0, (float) -0.4);
+            }
+        } else if (nHitPlatform() == 1) {
+            System.out.println("dead");
+        } else if (nHitPlatform() == 2) {
+            sprDino.fGround = sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight() - 1;
+            sprDino.vPos.y = sprDino.fGround;
+            sprDino.bGrav = false;
+            System.out.println("land");
+        }
+    }
+
+    int nHitPlatform() {
         Iterator<SprPlatform> iter = arsprPlatform.iterator();
         while (iter.hasNext()) {
             SprPlatform sprPlatform = iter.next();
+            System.out.println("prev dino" + sprDino.vPrevPos.y);
+            System.out.println("current dino"+sprDino.vPos.y);
+            System.out.println(sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight());
             if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
-                if((sprDino.getY()-sprDino.vDir.y) > ((sprPlatform.getY()-sprPlatform.vDir.y)+sprPlatform.getHeight())){
-                    sprDino.fGround = (sprPlatform.getY()+sprPlatform.getSprite().getHeight());
-                    sprDino.vPos.y = sprDino.fGround;
-                    return false;
+                System.out.println("OVERLAPS");
+                if (sprDino.vPrevPos.y >= (sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight())) {
+                    return 2;
+                } else if (sprDino.bGrav) {
+                    return 1;
+                } else if(sprDino.vPos.y == sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight() - 1){
+                    return 2;
                 }
-                return true;
-            }
+            } 
         }
-        return false;
+        return 0;
     }
 
     @Override
@@ -121,9 +142,11 @@ public class ScrPlatform implements Screen, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.SPACE && sprDino.bJump == false) {
+        if (keycode == Input.Keys.SPACE && sprDino.bGrav == false) {
+            sprDino.vPos.add(0, 1);
             sprDino.vDir.set((float) sprDino.vDir.x, 25);
-            sprDino.vGrav.set(0, (float) -0.5);
+            sprDino.vGrav.set(0, (float) -0.4);
+            sprDino.bGrav = true;
             sprDino.bJump = true;
         } else if (keycode == Input.Keys.A) {
             sprDino.vDir.set(-10, (float) sprDino.vDir.y);
