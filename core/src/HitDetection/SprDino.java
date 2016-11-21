@@ -10,7 +10,7 @@ public class SprDino extends Sprite {
     Texture txDino, txDeadDino;
     Vector2 vPos, vDir, vGrav, vPrevPos;
     private Sprite sprDino;
-    boolean bJump, bGrav;
+    boolean bJump, bGrav, bGoThrough, bOnPlatform;
     float fGround;
 
     SprDino(Texture _txDino, Texture _txDeadDino) {
@@ -23,6 +23,8 @@ public class SprDino extends Sprite {
         vPrevPos = new Vector2(0, 0);
         fGround = 0;
         bGrav = false;
+        bGoThrough = false;
+        bOnPlatform = false;
     }
 
     void gravity() {
@@ -47,7 +49,6 @@ public class SprDino extends Sprite {
     }
 
     void update() {
-        System.out.println(vGrav.y);
         vDir.add(vGrav);
         vPos.add(vDir);
         sprDino.setPosition(vPos.x, vPos.y);

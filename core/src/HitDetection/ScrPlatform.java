@@ -20,9 +20,11 @@ public class ScrPlatform implements Screen, InputProcessor {
     SprDino sprDino;
     SprPlatform sprPlatform;
     private Array<SprPlatform> arsprPlatform;
-    int nHitPlatform = 0;
+    int nHitType, HitPlatform;
 
     public ScrPlatform(Game _game) {
+        nHitType = 0;
+        HitPlatform = 0;
         game = _game;
         batch = new SpriteBatch();
         txDino = new Texture("Dinosaur.png");
@@ -76,41 +78,55 @@ public class ScrPlatform implements Screen, InputProcessor {
     }
 
     void HitDetection() {
-        if (nHitPlatform() == 0) {
+        nHitType = HitPlatform();
+        if (nHitType == 0) {
+            sprDino.bOnPlatform = false;
             System.out.println("NO HIT");
             sprDino.fGround = 0;
             sprDino.bGrav = true;
-            if(sprDino.bJump == false){
-            sprDino.vGrav.set(0, (float) -0.4);
+            if (sprDino.bJump == false) {
+                sprDino.vGrav.set(0, (float) -0.4);
             }
-        } else if (nHitPlatform() == 1) {
+        } else if (nHitType == 1) {
             System.out.println("dead");
-        } else if (nHitPlatform() == 2) {
+        } else if (nHitType == 2) {
+            if(sprDino.bOnPlatform == false){
+                sprDino.vDir.set((float) -0.5,sprDino.vDir.y);
+            }
+            sprDino.bOnPlatform = true;
             sprDino.fGround = sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight() - 1;
             sprDino.vPos.y = sprDino.fGround;
             sprDino.bGrav = false;
             System.out.println("land");
+        } 
+        else if (nHitType == 3) {
+            sprDino.bGoThrough = true;
+            System.out.println("pass through");
+        } else if(nHitType == 4){
+            System.out.println("I'm on the ground and the block hit me");
         }
     }
 
-    int nHitPlatform() {
+    int HitPlatform() {
         Iterator<SprPlatform> iter = arsprPlatform.iterator();
         while (iter.hasNext()) {
             SprPlatform sprPlatform = iter.next();
-            System.out.println("prev dino" + sprDino.vPrevPos.y);
-            System.out.println("current dino"+sprDino.vPos.y);
-            System.out.println(sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight());
             if (sprDino.getSprite().getBoundingRectangle().overlaps(sprPlatform.getSprite().getBoundingRectangle())) {
                 System.out.println("OVERLAPS");
                 if (sprDino.vPrevPos.y >= (sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight())) {
                     return 2;
-                } else if (sprDino.bGrav) {
-                    return 1;
-                } else if(sprDino.vPos.y == sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight() - 1){
+                } else if (sprDino.vPrevPos.y + sprDino.getSprite().getHeight() <= sprPlatform.vPrevPos.y) {
+                    return 3;
+                } else if (sprDino.vPos.y == sprPlatform.vPrevPos.y + sprPlatform.getSprite().getHeight() - 1) {
                     return 2;
+                } else if (sprDino.bGrav && sprDino.bGoThrough == false) {
+                    return 1;
+                } else if(sprDino.bGrav == false){
+                    return 4;
                 }
-            } 
+            }
         }
+        sprDino.bGoThrough = false;
         return 0;
     }
 
@@ -142,6 +158,9 @@ public class ScrPlatform implements Screen, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        if(sprDino.bOnPlatform){
+        sprDino.vDir.set((float) -0.5,sprDino.vDir.y);
+        }
         if (keycode == Input.Keys.SPACE && sprDino.bGrav == false) {
             sprDino.vPos.add(0, 1);
             sprDino.vDir.set((float) sprDino.vDir.x, 25);
@@ -155,7 +174,7 @@ public class ScrPlatform implements Screen, InputProcessor {
             sprDino.vDir.set(10, (float) sprDino.vDir.y);
         } else if (keycode == Input.Keys.E) {
             System.exit(3);
-        }
+        } 
         return false;
     }
 
@@ -163,8 +182,10 @@ public class ScrPlatform implements Screen, InputProcessor {
     public boolean keyUp(int keycode) {
         if (keycode == Input.Keys.A) {
             sprDino.vDir.set(0, (float) sprDino.vDir.y);
+            sprDino.bOnPlatform = false;
         } else if (keycode == Input.Keys.D) {
             sprDino.vDir.set(0, (float) sprDino.vDir.y);
+            sprDino.bOnPlatform = false;
         }
         return false;
     }
